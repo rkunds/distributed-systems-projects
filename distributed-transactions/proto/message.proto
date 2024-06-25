@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package Message;
+
+option go_package = ".";
+
+enum Action {
+    BEGIN = 0;
+    DEPOSIT = 1;
+    WITHDRAW = 2;
+    BALANCE = 3;
+    ABORT = 4;
+    COMMIT = 5;
+}
+
+enum Error {
+    OK = 0;
+    ABORTED = 1;
+    NOT_FOUND = 2;
+}
+
+message Empty {
+
+}
+
+message Command {
+    google.protobuf.Timestamp txnID = 1;
+    string clientID = 2;
+    string coordinatorID = 4;
+
+
+    Action action = 5;
+    string BranchID = 6;
+    string accountID = 7;
+    int32 amount = 8;
+}
+
+message Response {
+    google.protobuf.Timestamp txnId = 1;
+    string ServerID = 2;
+
+    Error error = 3;
+    int32 value = 4;
+}
+
+message Transaction {
+    google.protobuf.Timestamp txnId = 1;
+}
+
+message Exception {
+    google.protobuf.Timestamp txnId = 1;
+    Error error = 2;
+}
+
+service Bank {
+    rpc CoordSendCommand(Command) returns (Response);
+    rpc ServerSendCommand(Command) returns (Response);
+
+    rpc SendPrepare(Transaction) returns (Exception);
+    rpc SendCommit(Transaction) returns (Exception);
+    rpc SendAbort(Transaction) returns (Exception);
+
+    rpc Ping(Empty) returns (Empty);
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+// import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+package Message;
+
+option go_package = ".";
+
+message DataMessage {
+    string Transaction = 1;
+    uint64 TransactionID = 2;
+    string Sender = 3;
+}
+
+message Ack {
+    uint64 TransactionID = 1;
+    uint64 ProposedSeq = 2;
+    string Sender = 3;
+}
+
+message FinalAck {
+    uint64 TransactionID = 1;    
+    uint64 FinalSeq = 3;
+
+    string Sender = 2;
+    string PropsedNode = 4; // the node that proposed the final sequence
+}
+
+message LogMessage {
+    uint64 TransactionID = 1;
+    bool   Generated = 2;
+    string SenderNode = 3;
+    google.protobuf.Timestamp Time = 4;
+}
+
+message Empty {
+
+}
+
+service MessageService {
+    rpc Init(Empty) returns (Empty);
+    rpc SendMessage(DataMessage) returns (Ack);
+    rpc SendFinal(FinalAck) returns (Empty);
+    rpc Log(LogMessage) returns (Empty);
+}
